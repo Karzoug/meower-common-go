@@ -51,8 +51,8 @@ func Error(logger zerolog.Logger) grpc.UnaryServerInterceptor {
 }
 
 func logOnlyServiceError(ctx context.Context, err error, method string, logger zerolog.Logger) {
-	e, ok := err.(ucerr.Error)
-	if !ok {
+	var e ucerr.Error
+	if !errors.As(err, &e) {
 		return
 	}
 
