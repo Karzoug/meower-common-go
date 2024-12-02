@@ -4,6 +4,7 @@ go 1.23.3
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
+	github.com/davecgh/go-spew v1.1.1
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/jackc/pgx/v5 v5.7.1

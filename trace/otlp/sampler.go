@@ -1,6 +1,7 @@
 package otlp
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -19,10 +20,13 @@ func newEndpointExcluder(endpoints map[string]struct{}, probability float64) end
 // ShouldSample implements the sampler interface. It prevents the specified
 // endpoints from being added to the trace.
 func (ee endpointExcluder) ShouldSample(parameters trace.SamplingParameters) trace.SamplingResult {
-	for i := range parameters.Attributes {
-		if parameters.Attributes[i].Key == "http.target" {
-			if _, exists := ee.endpoints[parameters.Attributes[i].Value.AsString()]; exists {
-				return trace.SamplingResult{Decision: trace.Drop}
+	if len(ee.endpoints) != 0 {
+		spew.Dump(parameters.Attributes)
+		for i := range parameters.Attributes {
+			if parameters.Attributes[i].Key == "http.target" {
+				if _, exists := ee.endpoints[parameters.Attributes[i].Value.AsString()]; exists {
+					return trace.SamplingResult{Decision: trace.Drop}
+				}
 			}
 		}
 	}
