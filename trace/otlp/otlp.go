@@ -35,7 +35,7 @@ func RegisterGlobal(ctx context.Context, cfg Config) (shutdown func(context.Cont
 	}
 
 	tracerProvider := tracesdk.NewTracerProvider(
-		tracesdk.WithSampler(newEndpointExcluder(cfg.ExcludedRoutes, cfg.Probability)),
+		tracesdk.WithSampler(newEndpointExcluder(cfg.ExcludedHTTPRoutes, cfg.ExcludedGrpcMethods, cfg.Probability)),
 		tracesdk.WithBatcher(exp,
 			tracesdk.WithMaxExportBatchSize(tracesdk.DefaultMaxExportBatchSize),
 			tracesdk.WithBatchTimeout(tracesdk.DefaultScheduleDelay*time.Millisecond),

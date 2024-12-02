@@ -5,24 +5,44 @@ import (
 )
 
 type endpointExcluder struct {
-	endpoints   map[string]struct{}
-	probability float64
+	httpEndpoints map[string]struct{}
+	grpcMethods   map[string]string // rpc.service -> rpc.method
+	probability   float64
 }
 
-func newEndpointExcluder(endpoints map[string]struct{}, probability float64) endpointExcluder {
+func newEndpointExcluder(httpEndpoints map[string]struct{}, grpcMethods map[string]string, probability float64) endpointExcluder {
 	return endpointExcluder{
-		endpoints:   endpoints,
-		probability: probability,
+		httpEndpoints: httpEndpoints,
+		grpcMethods:   grpcMethods,
+		probability:   probability,
 	}
 }
 
 // ShouldSample implements the sampler interface. It prevents the specified
 // endpoints from being added to the trace.
 func (ee endpointExcluder) ShouldSample(parameters trace.SamplingParameters) trace.SamplingResult {
-	for i := range parameters.Attributes {
-		if parameters.Attributes[i].Key == "http.target" {
-			if _, exists := ee.endpoints[parameters.Attributes[i].Value.AsString()]; exists {
-				return trace.SamplingResult{Decision: trace.Drop}
+	if len(ee.httpEndpoints) != 0 {
+		for i := range parameters.Attributes {
+			if parameters.Attributes[i].Key == "http.target" {
+				if _, exists := ee.httpEndpoints[parameters.Attributes[i].Value.AsString()]; exists {
+					return trace.SamplingResult{Decision: trace.Drop}
+				}
+			}
+		}
+	}
+
+	if len(ee.grpcMethods) != 0 {
+		for i := range parameters.Attributes {
+			if parameters.Attributes[i].Key == "rpc.service" {
+				if method, exists := ee.grpcMethods[parameters.Attributes[i].Value.AsString()]; exists {
+					for j := range parameters.Attributes {
+						if parameters.Attributes[j].Key == "rpc.method" {
+							if parameters.Attributes[j].Value.AsString() == method {
+								return trace.SamplingResult{Decision: trace.Drop}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
