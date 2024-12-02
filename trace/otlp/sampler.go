@@ -1,6 +1,8 @@
 package otlp
 
 import (
+	"strings"
+
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -43,6 +45,11 @@ func (ee endpointExcluder) ShouldSample(parameters trace.SamplingParameters) tra
 						}
 					}
 				}
+			}
+			// drop all requests to get server reflection info
+			if parameters.Attributes[i].Key == "rpc.service" &&
+				strings.HasPrefix(parameters.Attributes[i].Value.AsString(), "grpc.reflection") {
+				return trace.SamplingResult{Decision: trace.Drop}
 			}
 		}
 	}
