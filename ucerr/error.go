@@ -45,32 +45,32 @@ func (e Error) Unwrap() error {
 	return e.err
 }
 
-func (e Error) HTTPCode() int {
+func (e Error) HTTPStatus() (int, string) {
 	switch e.code {
 	case codes.Aborted, codes.AlreadyExists:
-		return http.StatusConflict
+		return http.StatusConflict, e.msg
 	case codes.Canceled:
-		return statusClientClosedRequest
+		return statusClientClosedRequest, e.msg
 	case codes.DeadlineExceeded:
-		return http.StatusGatewayTimeout
+		return http.StatusGatewayTimeout, e.msg
 	case codes.InvalidArgument, codes.FailedPrecondition, codes.OutOfRange:
-		return http.StatusBadRequest
+		return http.StatusBadRequest, e.msg
 	case codes.NotFound:
-		return http.StatusNotFound
+		return http.StatusNotFound, e.msg
 	case codes.OK:
-		return http.StatusOK
+		return http.StatusOK, e.msg
 	case codes.PermissionDenied:
-		return http.StatusForbidden
+		return http.StatusForbidden, e.msg
 	case codes.ResourceExhausted:
-		return http.StatusTooManyRequests
+		return http.StatusTooManyRequests, e.msg
 	case codes.Unauthenticated:
-		return http.StatusUnauthorized
+		return http.StatusUnauthorized, e.msg
 	case codes.Unavailable:
-		return http.StatusServiceUnavailable
+		return http.StatusServiceUnavailable, e.msg
 	case codes.Unimplemented:
-		return http.StatusNotImplemented
+		return http.StatusNotImplemented, e.msg
 	default: // codes.Unknown, codes.Internal, codes.DataLoss
-		return http.StatusInternalServerError
+		return http.StatusInternalServerError, e.msg
 	}
 }
 
